@@ -1,0 +1,17 @@
+{
+  "name": "telegram-bot-calendar",
+  "version": "0.0.1",
+  "description": "Calendar in keyboard buttons",
+  "main": "./src/telegramCalendar.js",
+  "scripts": {
+    "test": "npm start test"
+  },
+  "author": "LuHnd",
+  "license": "ISC",
+  "dependencies": {
+    "calendar-month-array": "^2.1.1",
+    "node-telegram-bot-api": "^0.50.0",
+    "node-telegram-keyboard-wrapper": "^2.0.1",
+    "nodemon": "^2.0.4"
+  }
+}
