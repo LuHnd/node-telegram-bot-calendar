@@ -35,24 +35,31 @@ class Calendar {
     let row = [
       {
         text: "Пн",
+        callback_data: "date-ignore",
       },
       {
         text: "Вт",
+        callback_data: "date-ignore",
       },
       {
         text: "Ср",
+        callback_data: "date-ignore",
       },
       {
         text: "Чт",
+        callback_data: "date-ignore",
       },
       {
         text: "Пт",
+        callback_data: "date-ignore",
       },
       {
         text: "Сб",
+        callback_data: "date-ignore",
       },
       {
         text: "Вс",
+        callback_data: "date-ignore",
       },
     ];
 
@@ -60,7 +67,10 @@ class Calendar {
   }
 
   _getButtons() {
-    return [{ text: "<" }, { text: ">" }];
+    return [
+      { text: "<", callback_data: "date-prev" },
+      { text: ">", callback_data: "date-next" },
+    ];
   }
 
   _getMonthArray() {
@@ -73,12 +83,13 @@ class Calendar {
     return monthArray.map((i) =>
       i.map((j) => ({
         text: j,
+        callback_data: "date-" + j,
       }))
     );
   }
 
   _generateKeyboard() {
-    let keyboard = new kb.ReplyKeyboard();
+    let keyboard = new kb.InlineKeyboard();
     let label = this._getLabel();
     let rows = this._getMonthArray();
     let buttons = this._getButtons();
@@ -87,6 +98,7 @@ class Calendar {
       text: `${this.date.getFullYear()} / ${
         this.monthNames[this.date.getMonth()]
       }`,
+      callback_data: "date-ignore",
     });
     keyboard.addRow(...label);
     for (let i in rows) {
@@ -98,7 +110,7 @@ class Calendar {
   }
 
   getCalendar() {
-    return this._generateKeyboard();
+    return this._generateKeyboard().build();
   }
 
   nextMonth() {
@@ -109,6 +121,37 @@ class Calendar {
   prevMonth() {
     this.date = new Date(this.date.setMonth(this.date.getMonth() - 1));
     return this.getCalendar();
+  }
+
+  catchCallbackQuery(bot, query, cb) {
+    try {
+      let data = query.data,
+        message_id = query.message.message_id,
+        chat_id = query.message.chat.id;
+      console.log({ data, chat_id, message_id });
+
+      let query_split = data.split("-");
+      if (query_split[0] == "date") {
+        if (query_split[1] == "prev") {
+          let kb = this.prevMonth();
+          bot.editMessageReplyMarkup(kb.reply_markup, { chat_id, message_id });
+        }
+        if (query_split[1] == "next") {
+          let kb = this.nextMonth();
+          bot.editMessageReplyMarkup(kb.reply_markup, { chat_id, message_id });
+        }
+
+        if (typeof parseInt(query_split[1]) == "number") {
+          cb({
+            year: this.date.getFullYear(),
+            month: this.date.getMonth() + 1,
+            day: query_split[1],
+          });
+        }
+      }
+    } catch (err) {
+      console.log(err);
+    }
   }
 }
 

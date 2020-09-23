@@ -1,24 +1,18 @@
 const Calendar = require("./src/telegramCalendar.js");
 const TelegramBot = require("node-telegram-bot-api");
+const config = require("config");
+
+const token = config.get("bot_token");
+const chatId = config.get("chat_id");
 
 const bot = new TelegramBot(token, { polling: true });
 
 let c = new Calendar();
 
-bot.sendMessage(
-  chatId,
-  "calendar",
-  c.getCalendar().open({ resize_keyboard: false })
-);
+bot.sendMessage(chatId, "calendar", c.getCalendar());
 
-bot.onText(/</, (msg, match) => {
-  let calendar = c.prevMonth().open({ resize_keyboard: true });
-
-  bot.sendMessage(chatId, "Back", calendar);
-});
-
-bot.onText(/>/, (msg, match) => {
-  let calendar = c.nextMonth().open({ resize_keyboard: true });
-
-  bot.sendMessage(chatId, "Next", calendar);
+bot.on("callback_query", (query) => {
+  c.catchCallbackQuery(bot, query, function (date) {
+    console.log(date);
+  });
 });
